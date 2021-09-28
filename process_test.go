@@ -109,8 +109,8 @@ func TestProcess(t *testing.T) {
 					calls = append(calls, shouldSkip)
 					return nil
 				},
-				func(pkg *decorator.Package) resolver.RestorerResolver {
-					return NewSimpleResolver(pkg, nil)
+				func(pkg *decorator.Package, file *dst.File) resolver.RestorerResolver {
+					return NewSimpleResolver(pkg, file, nil)
 				},
 			)
 			check(t, err)

@@ -17,8 +17,8 @@ var (
 	}
 )
 
-func getResolver(pkg *decorator.Package) resolver.RestorerResolver {
-	return tracegen.NewSimpleResolver(pkg, hints)
+func getResolver(pkg *decorator.Package, file *dst.File) resolver.RestorerResolver {
+	return tracegen.NewSimpleResolver(pkg, file, hints)
 }
 
 func update(fn *dst.FuncDecl, shouldSkip bool) (imports []string) {

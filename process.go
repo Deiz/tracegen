@@ -20,7 +20,7 @@ var (
 // within packages matching the passed-in package patterns. The supplied resolver
 // must be capable of matching any pre-existing import within the loaded packages
 // as well as any introduced by the update function.
-func Process(settings Settings, packages []string, update func(fn *dst.FuncDecl, shouldSkip bool) (imports []string), getResolver func(pkg *decorator.Package) resolver.RestorerResolver) (err error) {
+func Process(settings Settings, packages []string, update func(fn *dst.FuncDecl, shouldSkip bool) (imports []string), getResolver func(pkg *decorator.Package, file *dst.File) resolver.RestorerResolver) (err error) {
 	pkgs, err := LoadPackages(packages)
 	if err != nil {
 		return
@@ -38,7 +38,7 @@ func LoadPackages(packages []string) (pkgs []*decorator.Package, err error) {
 	return pkgs, nil
 }
 
-func ProcessPackages(settings Settings, pkgs []*decorator.Package, update func(fn *dst.FuncDecl, shouldSkip bool) (imports []string), getResolver func(pkg *decorator.Package) resolver.RestorerResolver) (err error) {
+func ProcessPackages(settings Settings, pkgs []*decorator.Package, update func(fn *dst.FuncDecl, shouldSkip bool) (imports []string), getResolver func(pkg *decorator.Package, file *dst.File) resolver.RestorerResolver) (err error) {
 	for _, pkg := range pkgs {
 		var excluded bool
 		for _, pattern := range settings.excludePatterns {
@@ -87,11 +87,11 @@ func ProcessPackages(settings Settings, pkgs []*decorator.Package, update func(f
 			})
 		}
 
-		resolver := getResolver(pkg)
-
 		changed := make(map[string][]byte)
 
 		for _, file := range pkg.Syntax {
+			resolver := getResolver(pkg, file)
+
 			pre, err := fileContents(pkg, file, resolver)
 			if err != nil {
 				return err
