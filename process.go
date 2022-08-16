@@ -133,7 +133,12 @@ func ProcessPackages(settings Settings, pkgs []*decorator.Package, update func(f
 							switch field := field.Type.(type) {
 							// Pointer receivers
 							case *dst.StarExpr:
-								typeName = field.X.(*dst.Ident).Name
+								ident, ok := field.X.(*dst.Ident)
+								if !ok {
+									shouldSkip = true
+								} else {
+									typeName = ident.Name
+								}
 							// Non-pointer receivers
 							case *dst.Ident:
 								typeName = field.Name
