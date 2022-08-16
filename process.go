@@ -128,16 +128,7 @@ func ProcessPackages(settings Settings, pkgs []*decorator.Package, update func(f
 					// Check for a struct-level skip tag
 					if node.Recv != nil {
 						for _, field := range node.Recv.List {
-							var typeName string
-
-							switch field := field.Type.(type) {
-							// Pointer receivers
-							case *dst.StarExpr:
-								typeName = field.X.(*dst.Ident).Name
-							// Non-pointer receivers
-							case *dst.Ident:
-								typeName = field.Name
-							}
+							typeName := typeNameFromFieldExpr(field.Type)
 
 							if typeName != "" {
 								if _, include := enableTypes[typeName]; include {
@@ -200,4 +191,17 @@ func fileContents(p *decorator.Package, file *dst.File, resolver resolver.Restor
 	}
 
 	return buf.Bytes(), nil
+}
+
+func typeNameFromFieldExpr(expr dst.Expr) string {
+	switch expr := expr.(type) {
+	case *dst.Ident:
+		return expr.Name
+	case *dst.IndexExpr:
+		return typeNameFromFieldExpr(expr.X)
+	case *dst.StarExpr:
+		return typeNameFromFieldExpr(expr.X)
+	}
+
+	return ""
 }

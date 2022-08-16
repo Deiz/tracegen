@@ -54,6 +54,18 @@ func (f *Foo) A() {}
 func (f *Foo) B() {}
 `
 
+const genericTypeReceiver = `package main
+
+type Foo[T any] struct{}
+
+func (f *Foo[T]) Foo() {}
+`
+
+const genericFunctionParam = `package main
+
+func Foo[T any]() {}
+`
+
 func check(t *testing.T, err error) {
 	t.Helper()
 
@@ -92,6 +104,8 @@ func TestProcess(t *testing.T) {
 		"exported skips non-exported funcs":                  {inputNonExportedFunc, []bool{true}, Settings{Exported: true}},
 		"explicit include preempts exclude":                  {explicitIncludeMethod, []bool{true, false}, Settings{}},
 		"explicit include preempts untagged parent":          {explicitIncludeMethod, []bool{true, false}, Settings{Tagged: true}},
+		"default calls funcs with generic type receiver":     {genericTypeReceiver, []bool{false}, Settings{}},
+		"default calls funcs with generic function param":    {genericFunctionParam, []bool{false}, Settings{}},
 	}
 
 	for name, test := range tests {
